@@ -25,21 +25,18 @@ func main() {
 	vancouverUrl := "https://weather.gc.ca/rss/city/bc-74_e.xml"
 	response, err := http.Get(vancouverUrl)
 	if err != nil {
-		fmt.Printf("error getting weather data: %T: %+v\n", err, err)
-		os.Exit(1)
+		printErrAndExit(err, "error getting weather data")
 	}
 
 	defer response.Body.Close()
 	contents, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		fmt.Printf("error reading weather response: %T: %+v\n", err, err)
-		os.Exit(1)
+		printErrAndExit(err, "error reading weather response")
 	}
 
 	var feed Feed
 	if err := xml.Unmarshal(contents, &feed); err != nil {
-		fmt.Printf("error processing XML response: %T: %+v\n", err, err)
-		os.Exit(1)
+		printErrAndExit(err, "error processing XML response")
 	}
 
 	currentConditions := feed.findCurrentConditions()
@@ -54,4 +51,9 @@ func (f *Feed) findCurrentConditions() *Entry {
 		}
 	}
 	return nil
+}
+
+func printErrAndExit(e error, message string) {
+	fmt.Printf("%v: %T: %+v\n", message, e, e)
+	os.Exit(1)
 }
